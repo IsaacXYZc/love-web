@@ -1,20 +1,34 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Shape, Image as KonvaImage } from "react-konva";
 
 const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
   const [image, setImage] = useState(null);
   const [pieces, setPieces] = useState([]);
   const [scale, setScale] = useState(1);
+  const [snapPieces, setSnapPieces] = useState([]);
+  const [isComplete, setIsComplete] = useState(false);
+  const pieceRefs = useRef({}); // Guarda referencias a los nodos de las piezas
 
   useEffect(() => {
     const img = new window.Image();
     img.src = imageUrl;
 
     img.onload = () => {
-      const newScale = Math.min(
-        (window.innerWidth * 0.6) / img.width,
-        (window.innerHeight * 0.8) / img.height
-      );
+      let newScale;
+      if (window.innerWidth < 768) {
+        newScale = (window.innerWidth / img.width) * 0.9;
+        if(img.height > img.width){
+          newScale = window.innerHeight / img.height * 0.6;
+        }
+      } else {
+        const maxSize = window.innerWidth * 0.46;
+        if (img.height > img.width) {
+          newScale = maxSize / img.height;
+        } else {
+          newScale = maxSize / img.width;
+        }
+      }
+
       console.log(newScale);
       setScale(newScale);
       setImage(img);
@@ -27,24 +41,87 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
     const pieceHeight = (img.height / rows) * newScale;
 
     const newPieces = [];
+    const newSnapPieces = [];
+
     let id = 0;
+    let targetX;
+    let targetY;
+    if (window.innerWidth < 768) {
+      targetX = window.innerWidth * 0.5 - img.width * newScale * 0.5;
+      targetY = window.innerHeight * 0.05;
+    } else {
+      targetX = window.innerWidth * 0.25 - img.width * newScale * 0.5;
+      targetY = window.innerHeight * 0.5 - img.height * newScale * 0.5;
+    }
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < columns; col++) {
         newPieces.push({
           id: id.toString(),
-          x: col * pieceWidth,
-          y: row * pieceHeight,
+          x: targetX + col * pieceWidth,
+          y: targetY + row * pieceHeight,
           width: pieceWidth,
           height: pieceHeight,
           row,
           col,
           isDragging: false,
+          isCorrectPlace: false,
+        });
+        newSnapPieces.push({
+          id: id.toString(),
+          x: targetX + col * pieceWidth,
+          y: targetY + row * pieceHeight,
+          width: pieceWidth,
+          height: pieceHeight,
+          row,
+          col,
+          // isCorrect: false,
         });
         id++;
       }
     }
+    setSnapPieces(newSnapPieces);
     setPieces(newPieces);
+    setTimeout(() => scatterPieces(newPieces), 1000);
   };
+
+  const scatterPieces = (newPieces) => {
+    newPieces.forEach((piece) => {
+      const node = pieceRefs.current[piece.id];
+      if (node) {
+        let randomX;
+        let randomY;
+        if (window.innerWidth < 768) {
+          randomX = Math.random() * (window.innerWidth - piece.width);
+          randomY =
+          window.innerHeight * 0.6 +
+          Math.random() * (window.innerHeight * 0.4 - piece.height);
+        } else {
+          randomX = window.innerWidth * 0.5 +
+          Math.random() * (window.innerWidth * 0.4 - piece.width);
+          randomY =
+          window.innerHeight * 0.6 +
+          Math.random() * (window.innerHeight * 0.3 - piece.height);
+        }
+
+        node.to({
+          x: randomX,
+          y: randomY,
+          duration: 0.5,
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    const isPuzzleComplete = pieces.every((piece) => piece.isCorrectPlace);
+    if (isPuzzleComplete) {
+      setIsComplete(true);
+      // console.log(isComplete);
+    }
+    return () => {
+      setIsComplete(false);
+    };
+  }, [pieces]);
 
   const drawCustomPiece = (context, shape) => {
     const piece = shape.getAttr("piece");
@@ -225,6 +302,8 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
 
   const handleDragStart = (e) => {
     const id = e.target.id();
+    e.target.moveToTop();
+    console.log(e)
     setPieces(
       pieces.map((piece) => ({
         ...piece,
@@ -233,33 +312,82 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
     );
   };
 
-  const handleDragEnd = () => {
-    setPieces(
-      pieces.map((piece) => ({
-        ...piece,
-        isDragging: false,
-      }))
-    );
+  const handleDragEnd = (e) => {
+    const piece = e.target;
+    const tolerance = pieces[0].width * 0.15;
+    console.log(pieces[0].width, tolerance);
+
+    // Obtenemos la pieza correspondiente en snapPieces
+    const snapPiece = snapPieces[e.target.id()];
+
+    // Comprobamos si la pieza está en el rango de tolerancia
+    if (
+      snapPiece.x - tolerance < piece.x() &&
+      snapPiece.x + tolerance > piece.x() &&
+      snapPiece.y - tolerance < piece.y() &&
+      snapPiece.y + tolerance > piece.y()
+    ) {
+      // Si está dentro del rango de tolerancia, actualizamos las coordenadas
+      console.log("Correcto");
+      e.target.moveToBottom();
+      setPieces(
+        pieces.map((p) =>
+          p.id === piece.id()
+            ? {
+                ...p,
+                x: snapPiece.x,
+                y: snapPiece.y,
+                isDragging: false,
+                isCorrectPlace: true, // Marcamos como correcta
+              }
+            : p
+        )
+      );
+    } else {
+      // Si no se encuentra en el rango, simplemente se detiene el arrastre
+      setPieces(
+        pieces.map((p) =>
+          p.id === piece.id() ? { ...p, isDragging: false } : p
+        )
+      );
+    }
+    console.log(pieces[0]);
   };
 
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight}>
+    <Stage width={window.innerWidth<768?window.innerWidth:window.innerWidth*0.999} height={window.innerHeight}       
+    style={{
+      // backgroundColor: "#ff0000", // Color de fondo
+      backgroundImage: `url('fondo.png')`, // URL de la imagen
+      backgroundSize: 'cover', // Ajusta la imagen al tamaño del Stage
+      backgroundPosition: 'center', // Centra la imagen
+      backgroundRepeat: 'no-repeat', // Evita la repetición de la imagen
+    }}
+>
       <Layer>
-        <KonvaImage
-          image={image}
-          width={image.width * scale}
-          height={image.height * scale}
-          x={(window.innerWidth - image.width * scale) / 2 + 300}
-          y={(window.innerHeight - image.height * scale) / 2}
-          opacity={0.3}
-        />
+        {snapPieces.map((piece) => (
+          <Shape
+            key={piece.id}
+            id={piece.id}
+            piece={piece}
+            x={piece.x}
+            y={piece.y}
+            sceneFunc={drawCustomPiece}
+            fill={"#ffe2f0"}
+            stroke="#ca7e8e"
+            strokeWidth={1}
+          />
+        ))}
+      </Layer>
+      <Layer>
         {pieces.map((piece) => (
           <Shape
             key={piece.id}
             id={piece.id}
             piece={piece}
-            x={piece.x + (window.innerWidth - image.width * scale) / 2}
-            y={piece.y + (window.innerHeight - image.height * scale) / 2}
+            x={piece.isCorrectPlace ? piece.x : piece.x + 1}
+            y={piece.isCorrectPlace ? piece.y : piece.y + 1}
+            ref={(node) => (pieceRefs.current[piece.id] = node)}
             sceneFunc={drawCustomPiece}
             fillPatternImage={image}
             fillPatternScale={{
@@ -267,14 +395,17 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
               y: scale,
             }}
             fillPatternOffset={{
-              x: piece.x / scale,
-              y: piece.y / scale,
+              x: (piece.col * image.width) / columns,
+              y: (piece.row * image.height) / rows,
             }}
-            draggable
+            draggable={piece.isCorrectPlace ? false : true}
+            
             stroke="#000"
-            strokeWidth={1}
-            scaleX={piece.isDragging ? 1.1 : 1}
-            scaleY={piece.isDragging ? 1.1 : 1}
+            strokeWidth={
+              piece.isDragging ? 2.5 : piece.isCorrectPlace ? 0.5 : 2
+            }
+            scaleX={piece.isDragging ? 1.2 : 1}
+            scaleY={piece.isDragging ? 1.2 : 1}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           />
