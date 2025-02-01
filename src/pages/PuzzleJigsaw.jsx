@@ -29,7 +29,6 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
         }
       }
 
-      console.log(newScale);
       setScale(newScale);
       setImage(img);
       generatePuzzlePieces(img, newScale);
@@ -111,6 +110,9 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
       }
     });
   };
+
+
+  
 
   useEffect(() => {
     const isPuzzleComplete = pieces.every((piece) => piece.isCorrectPlace);
@@ -303,7 +305,6 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
   const handleDragStart = (e) => {
     const id = e.target.id();
     e.target.moveToTop();
-    console.log(e)
     setPieces(
       pieces.map((piece) => ({
         ...piece,
@@ -314,8 +315,7 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
 
   const handleDragEnd = (e) => {
     const piece = e.target;
-    const tolerance = pieces[0].width * 0.15;
-    console.log(pieces[0].width, tolerance);
+    const tolerance = Math.max(pieces[0].width, pieces[0].height) * 0.18;
 
     // Obtenemos la pieza correspondiente en snapPieces
     const snapPiece = snapPieces[e.target.id()];
@@ -351,7 +351,6 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
         )
       );
     }
-    console.log(pieces[0]);
   };
 
   return (
@@ -404,8 +403,8 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
             strokeWidth={
               piece.isDragging ? 2.5 : piece.isCorrectPlace ? 0.5 : 2
             }
-            scaleX={piece.isDragging ? 1.2 : 1}
-            scaleY={piece.isDragging ? 1.2 : 1}
+            scaleX={piece.isDragging ? 1 : (piece.isCorrectPlace)?1:0.9}
+            scaleY={piece.isDragging ? 1 : (piece.isCorrectPlace)?1:0.9}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           />
