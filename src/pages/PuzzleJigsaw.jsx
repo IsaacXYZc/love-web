@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Shape, Image as KonvaImage } from "react-konva";
+import PhotoFrame from "../components/PhotoFrame";
+import { useNavigate } from "react-router-dom";
 
-const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
+const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
   const [image, setImage] = useState(null);
   const [pieces, setPieces] = useState([]);
   const [scale, setScale] = useState(1);
   const [snapPieces, setSnapPieces] = useState([]);
-  const [isComplete, setIsComplete] = useState(false);
   const pieceRefs = useRef({}); // Guarda referencias a los nodos de las piezas
+  const navigate = useNavigate();
 
   useEffect(() => {
     const img = new window.Image();
@@ -34,6 +36,8 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
       generatePuzzlePieces(img, newScale);
     };
   }, [imageUrl, rows, columns]);
+
+
 
   const generatePuzzlePieces = (img, newScale) => {
     const pieceWidth = (img.width / columns) * newScale;
@@ -80,7 +84,7 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
     }
     setSnapPieces(newSnapPieces);
     setPieces(newPieces);
-    setTimeout(() => scatterPieces(newPieces), 1000);
+    setTimeout(() => scatterPieces(newPieces), 300);
   };
 
   const scatterPieces = (newPieces) => {
@@ -115,14 +119,23 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
   
 
   useEffect(() => {
-    const isPuzzleComplete = pieces.every((piece) => piece.isCorrectPlace);
+    const isPuzzleComplete = pieces.every((piece) => piece.isCorrectPlace) && pieces.length > 0;
     if (isPuzzleComplete) {
-      setIsComplete(true);
-      // console.log(isComplete);
+      handleGameFinish(true);
+      setTimeout(() => {
+        console.log("Puzzle Complete",isPuzzleComplete);
+        console.log("Pieces",pieces);
+        navigate("/fireworks");
+        const newPieces = pieces.map((piece) => {
+          return {
+            ...piece,
+            isDragging: false,
+            isCorrectPlace: false,
+          };
+        });
+        setPieces(newPieces);
+      }, 1000);
     }
-    return () => {
-      setIsComplete(false);
-    };
   }, [pieces]);
 
   const drawCustomPiece = (context, shape) => {
@@ -303,6 +316,7 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
   if (!image) return null;
 
   const handleDragStart = (e) => {
+    e.target.getStage().container().style.cursor = 'grabbing';
     const id = e.target.id();
     e.target.moveToTop();
     setPieces(
@@ -314,6 +328,7 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
   };
 
   const handleDragEnd = (e) => {
+    e.target.getStage().container().style.cursor = 'grab';
     const piece = e.target;
     const tolerance = Math.max(pieces[0].width, pieces[0].height) * 0.18;
 
@@ -328,7 +343,8 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
       snapPiece.y + tolerance > piece.y()
     ) {
       // Si está dentro del rango de tolerancia, actualizamos las coordenadas
-      console.log("Correcto");
+      new Audio("/assets/pop1.mp3").play();
+      e.target.getStage().container().style.cursor = 'default';
       e.target.moveToBottom();
       setPieces(
         pieces.map((p) =>
@@ -354,6 +370,7 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
   };
 
   return (
+    <>
     <Stage width={window.innerWidth<768?window.innerWidth:window.innerWidth*0.999} height={window.innerHeight}       
     style={{
       // backgroundColor: "#ff0000", // Color de fondo
@@ -403,14 +420,22 @@ const PuzzleJigsaw = ({ imageUrl, rows, columns }) => {
             strokeWidth={
               piece.isDragging ? 2.5 : piece.isCorrectPlace ? 0.5 : 2
             }
-            scaleX={piece.isDragging ? 1 : (piece.isCorrectPlace)?1:0.9}
-            scaleY={piece.isDragging ? 1 : (piece.isCorrectPlace)?1:0.9}
+            
+            scaleX={piece.isDragging ? 1.1 : 1}
+            scaleY={piece.isDragging ? 1.1 : 1}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            onMouseEnter={piece.isCorrectPlace ? (e) => e.target.getStage().container().style.cursor = 'default' : (e) => e.target.getStage().container().style.cursor = 'grab'}
+            onMouseLeave={(e) =>  e.target.getStage().container().style.cursor = 'default'}
           />
         ))}
       </Layer>
     </Stage>
+    <PhotoFrame
+      imageUrl={imageUrl}
+      text={text}
+    />
+    </>
   );
 };
 

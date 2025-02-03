@@ -1,34 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import viteLogo from "/vite.svg";
+import { Navigate, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import PuzzleJigsaw from "./pages/PuzzleJigsaw";
+import Fireworks from "./pages/Fireworks";
+import Card3dModel from "./pages/Card3dModel";
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const handleGameFinish = (finish) => {
+    localStorage.setItem("gameFinish", finish);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card bg-red-200">
-        <button className="bg-blue-500" onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <PuzzleJigsaw
+              handleGameFinish={handleGameFinish}
+              imageUrl={
+                "descarga.png"
+              }
+              text="¡Puzzle Jigsaw!"
+              rows={2}
+              columns={2}
+            />
+          }
+        />
+        <Route path="/fireworks"  element={ localStorage.getItem("gameFinish") ? <Fireworks /> : <Navigate to="/" />} />
+        <Route path="/scene1" element={ <Card3dModel path="/model3d/eric.glb" imgUrl="https://images7.alphacoders.com/113/1137187.jpg" />} />
+        <Route path="/scene2" element={ <Card3dModel path="/model3d/c_eric.glb" imgUrl="https://images7.alphacoders.com/113/1137187.jpg" />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+     
+    </Router>
+  );
 }
 
-export default App
+export default App;
+
+
+ /* 
+ <Card3dModel
+      path="/model3d/eric.glb"
+      imgUrl="https://images7.alphacoders.com/113/1137187.jpg" //"southpark.jpg", "fondo.png", "https://images7.alphacoders.com/113/1137187.jpg"
+    /> 
+*/
