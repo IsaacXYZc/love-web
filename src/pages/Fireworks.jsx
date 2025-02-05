@@ -11,6 +11,7 @@ import startApp from "../utils/app.js";
 import { TextGeometry } from "three/addons/geometries/TextGeometry.js";
 import { FontLoader } from "three/addons/loaders/FontLoader.js";
 import { MeshSurfaceSampler } from "three/addons/math/MeshSurfaceSampler.js";
+import TinyCharacter from "../components/tinyCharacter.jsx";
 
 const Fireworks = () => {
   const mountRef = useRef(null);
@@ -29,7 +30,7 @@ const Fireworks = () => {
 
       renderer3.start();
 
-      let audio = new Audio(camera);
+      let audio = new Audio(camera); 
 
       let sfx = ({
         name,
@@ -307,6 +308,18 @@ const Fireworks = () => {
           width: "100%",
           height: "100vh",
         }}
+      />
+      <TinyCharacter
+        image="capibara.webp" // URL de la imagen
+        position={{ top: "90%", left: "90%" }} // Posición en la pantalla position
+        delay={3000} // Tiempo de espera en milisegundos (3 segundos)
+        redirectUrl="https://google.com" // URL de redirección
+        direction="right" // Dirección de entrada ("left" o "right")
+        duration="3"
+        size="100px" // Tamaño del personaje
+        dialogImage="dialog.png" // URL de la burbuja de diálogo
+        dialogDuration={1400} // Duración de la burbuja en ms
+        dialogInterval={6000} // Intervalo de aparición de la burbuja en ms
       />
     </div>
   );

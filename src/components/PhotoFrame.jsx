@@ -8,7 +8,7 @@ const PhotoFrame = ({ imageUrl, text, x , y }) => {
     if(window.innerWidth < 768) {
       setDimentions({ initialX:"70%", initialY:"0%"});
     } else {
-      setDimentions({ initialX:"55%", initialY:"5%"});
+      setDimentions({ initialX:"55%", initialY:"15%"});
     }
   },[]);
   

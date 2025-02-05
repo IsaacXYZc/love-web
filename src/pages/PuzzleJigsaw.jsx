@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Shape, Image as KonvaImage } from "react-konva";
 import PhotoFrame from "../components/PhotoFrame";
 import { useNavigate } from "react-router-dom";
+import ImageModal from "../components/ImageModal";
 
 const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
   const [image, setImage] = useState(null);
@@ -10,6 +11,7 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
   const [snapPieces, setSnapPieces] = useState([]);
   const pieceRefs = useRef({}); // Guarda referencias a los nodos de las piezas
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const img = new window.Image();
@@ -115,26 +117,38 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
     });
   };
 
-
+  const handleCloseModal= () => {
+    setOpen(false);
+    navigate("/fireworks");
+    const newPieces = pieces.map((piece) => {
+      return {
+        ...piece,
+        isDragging: false,
+        isCorrectPlace: false,
+      };
+    });
+    setPieces(newPieces);
+  };
   
 
   useEffect(() => {
     const isPuzzleComplete = pieces.every((piece) => piece.isCorrectPlace) && pieces.length > 0;
     if (isPuzzleComplete) {
       handleGameFinish(true);
-      setTimeout(() => {
-        console.log("Puzzle Complete",isPuzzleComplete);
-        console.log("Pieces",pieces);
-        navigate("/fireworks");
-        const newPieces = pieces.map((piece) => {
-          return {
-            ...piece,
-            isDragging: false,
-            isCorrectPlace: false,
-          };
-        });
-        setPieces(newPieces);
-      }, 1000);
+      setOpen(true);
+      // setTimeout(() => {
+        // console.log("Puzzle Complete",isPuzzleComplete);
+        // console.log("Pieces",pieces);
+      //   navigate("/fireworks");
+      //   const newPieces = pieces.map((piece) => {
+      //     return {
+      //       ...piece,
+      //       isDragging: false,
+      //       isCorrectPlace: false,
+      //     };
+      //   });
+      //   setPieces(newPieces);
+      // }, 1000);
     }
   }, [pieces]);
 
@@ -434,6 +448,13 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
     <PhotoFrame
       imageUrl={imageUrl}
       text={text}
+    />
+    <ImageModal
+      open={open}
+      handleClose={handleCloseModal}
+      imageUrl={imageUrl}
+      title="🎉 Felicidades Nath, My beloved! 🎉"
+      description="Se supone que somos nosotros, por que no tenemos fotos juntos :)"
     />
     </>
   );

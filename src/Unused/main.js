@@ -1,5 +1,5 @@
 import Renderer from "./renderer.js";
-import startApp from "./app.js";
+import startApp from "../utils/app.js";
 
 let renderer3 = new Renderer();
 
@@ -12,7 +12,7 @@ let { dd } = renderer3;
 
 renderer3.start();
 
-import Audio from "./audio.js";
+import Audio from "../utils/audio.js";
 
 let audio = new Audio(camera);
 

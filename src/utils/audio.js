@@ -6,8 +6,8 @@ export default class Audio {
         this.soundsLoading = {}
 
         this.play = (name,position,volume,detune)=>{}
-        let firstClick = ()=>{
-            document.removeEventListener('pointerdown', firstClick)
+        // let firstClick = ()=>{
+            // document.removeEventListener('pointerdown', firstClick)
             let listener = new THREE.AudioListener()
             camera.add(listener)
             this.audioLoader = new THREE.AudioLoader();
@@ -21,9 +21,8 @@ export default class Audio {
                 this.play('boom0')
             }
             , 1000)
-        }
-
-        document.addEventListener('pointerdown', firstClick)
+        // }
+        // document.addEventListener('pointerdown', firstClick)
 
     }
 

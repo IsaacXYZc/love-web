@@ -7,29 +7,30 @@ import Fireworks from "./pages/Fireworks";
 import Card3dModel from "./pages/Card3dModel";
 
 function App() {
+  const [gameFinished, setGameFinished] = useState(sessionStorage.getItem("gameFinished") || false);
 
   const handleGameFinish = (finish) => {
-    localStorage.setItem("gameFinish", finish);
+    sessionStorage.setItem("gameFinished", finish);
+    setGameFinished(finish);  // Actualiza el estado de React
   };
 
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={
+        <Route path="/" element={
             <PuzzleJigsaw
               handleGameFinish={handleGameFinish}
               imageUrl={
-                "descarga.png"
+                "imagen.png"
               }
-              text="¡Puzzle Jigsaw!"
-              rows={2}
+              //frase bonita de amor
+              text="El amor es la fuerza más humilde, pero la más poderosa de que dispone el mundo."
+              rows={1}
               columns={2}
             />
           }
         />
-        <Route path="/fireworks"  element={ localStorage.getItem("gameFinish") ? <Fireworks /> : <Navigate to="/" />} />
+        <Route path="/fireworks"  element={ gameFinished  ? <Fireworks /> : <Navigate to="/" />} />
         <Route path="/scene1" element={ <Card3dModel path="/model3d/eric.glb" imgUrl="https://images7.alphacoders.com/113/1137187.jpg" />} />
         <Route path="/scene2" element={ <Card3dModel path="/model3d/c_eric.glb" imgUrl="https://images7.alphacoders.com/113/1137187.jpg" />} />
         <Route path="*" element={<Navigate to="/" />} />

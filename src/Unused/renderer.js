@@ -3,12 +3,12 @@ import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {RGBELoader} from "three/addons/loaders/RGBELoader.js";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {GUI} from "three/addons/libs/lil-gui.module.min.js";
-import PostProcessing from "./PostProcessing.js"
+import PostProcessing from "../utils/PostProcessing.js"
 
 let gui = new GUI();
 gui.close()
 
-import {Flow} from "./flow.js"
+import {Flow} from "../utils/flow.js"
 
 export default function Renderer() { //{THREE,OrbitControls,RGBELoader,GLTFLoader}
     
