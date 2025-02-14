@@ -39,6 +39,7 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, rows, columns, openModal }) 
   useEffect(() => {
     const playSongOnFirstClick = () => {
       song.volume = 0.1;
+      song.loop = true; 
       song.play();
       document.removeEventListener("click", playSongOnFirstClick);
     };
