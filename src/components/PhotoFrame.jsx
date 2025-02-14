@@ -5,8 +5,8 @@ const PhotoFrame = ({ imageUrl, text, x , y }) => {
   const [dimentions, setDimentions] = useState({ initialX:"50%", initialY:"10%"});
 
   useEffect(() => {
-    if(window.innerWidth < 768) {
-      setDimentions({ initialX:"70%", initialY:"0%"});
+    if(window.visualViewport.width < 768) {
+      setDimentions({ initialX:"35%", initialY:"40%"});
     } else {
       setDimentions({ initialX:"55%", initialY:"15%"});
     }
@@ -28,7 +28,7 @@ const PhotoFrame = ({ imageUrl, text, x , y }) => {
       // style={{position: "absolute", left: x, top: y}}
     >
       <div
-        className="absolute pointer-events-auto cursor-move max-w-[30vw] sm:max-w-[20vw] z-50 rotate-[-0.05rad] bg-stone-100 text-center flex flex-col p-1.5 justify-center items-center shadow-custom-frame border-2 border-r-neutral-500 border-neutral-300 border-l-white border-t-white"
+        className="absolute pointer-events-auto cursor-move min-w-[40vw] sm:min-w-[auto]  max-w-[30vw] sm:max-w-[20vw] z-50 rotate-[-0.05rad] bg-stone-100 text-center flex flex-col p-1.5 justify-center items-center shadow-custom-frame border-2 border-r-neutral-500 border-neutral-300 border-l-white border-t-white"
         style={{
           left: dimentions.initialX,
           top: dimentions.initialY,
@@ -38,9 +38,9 @@ const PhotoFrame = ({ imageUrl, text, x , y }) => {
         <img
           src={imageUrl}
           alt="Frame Content"
-          className="shadow-inset-light sm:max-h-[35vh] min-w-full object-contain bg-stone-800 pointer-events-none border-2 border-neutral-400 border-b-white border-t-stone-400 border-r-white"
+          className="shadow-inset-light min-w-full sm:max-h-[35vh] object-contain bg-stone-800 pointer-events-none border-2 border-neutral-400 border-b-white border-t-stone-400 border-r-white"
         />
-        <div className=" sm:mt-2 font-rouge mb-2 sm:mb-4 text-sm sm:text-2xl font-bold text-stone-800">
+        <div className=" sm:mt-2 font-rouge mb-2 sm:mb-4 text-md sm:text-2xl font-bold text-stone-800">
           {text}
         </div>
       </div>

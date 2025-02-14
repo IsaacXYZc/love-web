@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Draggable from "react-draggable";
 
 const TinyCharacter = ({ image, position, delay, redirectUrl, direction, duration, size, dialogImage = "dialog.png",
     dialogDuration = 3000, // Duración de la burbuja en ms
@@ -26,6 +27,11 @@ const TinyCharacter = ({ image, position, delay, redirectUrl, direction, duratio
       }, dialogInterval)}
       ,duration*1000);
 
+      setTimeout(() => { 
+        clearInterval(dialogTimer);
+        setShowDialog(false);
+      }, 30000);
+
       return () => clearInterval(dialogTimer);
     }
   }, [isVisible, dialogDuration, dialogInterval]);
@@ -40,14 +46,15 @@ const TinyCharacter = ({ image, position, delay, redirectUrl, direction, duratio
 
   return (
     isVisible && (
-      <div style={{ position: "absolute", top: position.top, left: position.left, transform: "translate(-50%, -50%)", zIndex: 9999 }}>
+      // <Draggable axis="both" bounds="parent">
+      <div style={{ position: "absolute",width:size, top: position.top, left: position.left, bottom:position.bottom, right:position.right, transform: "translate(-50%, -50%)", zIndex: 9999 }}>
         {/* Burbuja de diálogo */}
-        {showDialog && (
+        {/* {showDialog && (
           <motion.img
             src={dialogImage}
             alt="Dialog Bubble"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: -50 }}
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: -40 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
             style={{
@@ -60,7 +67,7 @@ const TinyCharacter = ({ image, position, delay, redirectUrl, direction, duratio
               pointerEvents: "none",
             }}
           />
-        )}
+        )} */}
 
         {/* Personaje */}
         <motion.img
@@ -72,11 +79,12 @@ const TinyCharacter = ({ image, position, delay, redirectUrl, direction, duratio
           transition={{ duration, ease: "easeOut" }}
           style={{
             cursor: "pointer",
-            width: size,
+            width: "full",
             height: "auto",
           }}
         />
       </div>
+      // </Draggable>
     )
   );
 };

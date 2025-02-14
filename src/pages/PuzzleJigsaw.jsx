@@ -1,17 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Shape, Image as KonvaImage } from "react-konva";
-import PhotoFrame from "../components/PhotoFrame";
-import { useNavigate } from "react-router-dom";
-import ImageModal from "../components/ImageModal";
 
-const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
+const PuzzleJigsaw = ({ handleGameFinish, imageUrl, rows, columns, openModal }) => {
   const [image, setImage] = useState(null);
   const [pieces, setPieces] = useState([]);
   const [scale, setScale] = useState(1);
   const [snapPieces, setSnapPieces] = useState([]);
   const pieceRefs = useRef({}); // Guarda referencias a los nodos de las piezas
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const img = new window.Image();
@@ -19,13 +14,13 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
 
     img.onload = () => {
       let newScale;
-      if (window.innerWidth < 768) {
-        newScale = (window.innerWidth / img.width) * 0.9;
+      if (window.visualViewport.height < 768) {
+        newScale = (window.visualViewport.width / img.width) * 0.9;
         if(img.height > img.width){
-          newScale = window.innerHeight / img.height * 0.6;
+          newScale = window.visualViewport.height / img.height * 0.6;
         }
       } else {
-        const maxSize = window.innerWidth * 0.46;
+        const maxSize = window.visualViewport.width * 0.46;
         if (img.height > img.width) {
           newScale = maxSize / img.height;
         } else {
@@ -37,9 +32,23 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
       setImage(img);
       generatePuzzlePieces(img, newScale);
     };
+    
   }, [imageUrl, rows, columns]);
 
+  const song = new Audio("song.mp3");
+  useEffect(() => {
+    const playSongOnFirstClick = () => {
+      song.volume = 0.1;
+      song.play();
+      document.removeEventListener("click", playSongOnFirstClick);
+    };
 
+    document.addEventListener("click", playSongOnFirstClick);
+
+    return () => {
+      document.removeEventListener("click", playSongOnFirstClick);
+    };
+  }, []);
 
   const generatePuzzlePieces = (img, newScale) => {
     const pieceWidth = (img.width / columns) * newScale;
@@ -52,11 +61,11 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
     let targetX;
     let targetY;
     if (window.innerWidth < 768) {
-      targetX = window.innerWidth * 0.5 - img.width * newScale * 0.5;
-      targetY = window.innerHeight * 0.05;
+      targetX = window.visualViewport.width * 0.5 - img.width * newScale * 0.5;
+      targetY = window.visualViewport.height * 0.05;
     } else {
-      targetX = window.innerWidth * 0.25 - img.width * newScale * 0.5;
-      targetY = window.innerHeight * 0.5 - img.height * newScale * 0.5;
+      targetX = window.visualViewport.width * 0.25 - img.width * newScale * 0.5;
+      targetY = window.visualViewport.height * 0.5 - img.height * newScale * 0.5;
     }
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < columns; col++) {
@@ -95,17 +104,17 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
       if (node) {
         let randomX;
         let randomY;
-        if (window.innerWidth < 768) {
-          randomX = Math.random() * (window.innerWidth - piece.width);
+        if (window.visualViewport.width < 768) {
+          randomX = Math.random() * (window.visualViewport.width - piece.width);
           randomY =
-          window.innerHeight * 0.6 +
-          Math.random() * (window.innerHeight * 0.4 - piece.height);
+          window.visualViewport.height * 0.6 +
+          Math.random() * (window.visualViewport.height * 0.4 - piece.height);
         } else {
-          randomX = window.innerWidth * 0.5 +
-          Math.random() * (window.innerWidth * 0.4 - piece.width);
+          randomX = window.visualViewport.width * 0.5 +
+          Math.random() * (window.visualViewport.width * 0.4 - piece.width);
           randomY =
-          window.innerHeight * 0.6 +
-          Math.random() * (window.innerHeight * 0.3 - piece.height);
+          window.visualViewport.height * 0.6 +
+          Math.random() * (window.visualViewport.height * 0.3 - piece.height);
         }
 
         node.to({
@@ -117,38 +126,14 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
     });
   };
 
-  const handleCloseModal= () => {
-    setOpen(false);
-    navigate("/fireworks");
-    const newPieces = pieces.map((piece) => {
-      return {
-        ...piece,
-        isDragging: false,
-        isCorrectPlace: false,
-      };
-    });
-    setPieces(newPieces);
-  };
-  
-
   useEffect(() => {
     const isPuzzleComplete = pieces.every((piece) => piece.isCorrectPlace) && pieces.length > 0;
     if (isPuzzleComplete) {
       handleGameFinish(true);
-      setOpen(true);
-      // setTimeout(() => {
-        // console.log("Puzzle Complete",isPuzzleComplete);
-        // console.log("Pieces",pieces);
-      //   navigate("/fireworks");
-      //   const newPieces = pieces.map((piece) => {
-      //     return {
-      //       ...piece,
-      //       isDragging: false,
-      //       isCorrectPlace: false,
-      //     };
-      //   });
-      //   setPieces(newPieces);
-      // }, 1000);
+      // const song = new Audio("song.mp3");
+      // song.volume = 0;
+      // song.play();
+      openModal(true);
     }
   }, [pieces]);
 
@@ -344,7 +329,10 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
   const handleDragEnd = (e) => {
     e.target.getStage().container().style.cursor = 'grab';
     const piece = e.target;
-    const tolerance = Math.max(pieces[0].width, pieces[0].height) * 0.18;
+    let tolerance = Math.max(pieces[0].width, pieces[0].height) * 0.18;
+    if(window.innerWidth < 768){
+      tolerance = tolerance*1.8;
+    }
 
     // Obtenemos la pieza correspondiente en snapPieces
     const snapPiece = snapPieces[e.target.id()];
@@ -384,8 +372,10 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
   };
 
   return (
-    <>
-    <Stage width={window.innerWidth<768?window.innerWidth:window.innerWidth*0.999} height={window.innerHeight}       
+    <div className="w-full h-[100dvh] flex justify-center items-center">
+    
+    <Stage width={window.visualViewport.width} height={window.visualViewport.height*0.999}       
+    
     style={{
       // backgroundColor: "#ff0000", // Color de fondo
       backgroundImage: `url('fondo.png')`, // URL de la imagen
@@ -432,7 +422,7 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
             
             stroke="#000"
             strokeWidth={
-              piece.isDragging ? 2.5 : piece.isCorrectPlace ? 0.5 : 2
+              piece.isDragging ? 2.5 : piece.isCorrectPlace ? 0.5 : 1.4
             }
             
             scaleX={piece.isDragging ? 1.1 : 1}
@@ -445,18 +435,8 @@ const PuzzleJigsaw = ({ handleGameFinish, imageUrl, text, rows, columns }) => {
         ))}
       </Layer>
     </Stage>
-    <PhotoFrame
-      imageUrl={imageUrl}
-      text={text}
-    />
-    <ImageModal
-      open={open}
-      handleClose={handleCloseModal}
-      imageUrl={imageUrl}
-      title="🎉 Felicidades Nath, My beloved! 🎉"
-      description="Se supone que somos nosotros, por que no tenemos fotos juntos :)"
-    />
-    </>
+    
+    </div>
   );
 };
 

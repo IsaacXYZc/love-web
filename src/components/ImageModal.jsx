@@ -15,7 +15,7 @@ const ImageModal = ({ open, handleClose, imageUrl, title, description }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg p-6 min-w-[40vw] h-[72vh] shadow-lg text-center">
+      <div className="bg-white rounded-lg p-6 shadow-lg text-center">
         <h2 className="text-4xl font-rouge font-semibold mb-2">{title}</h2>
         <img
           src={imageUrl}

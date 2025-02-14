@@ -30,7 +30,7 @@ const Fireworks = () => {
 
       renderer3.start();
 
-      let audio = new Audio(camera); 
+      let audio = new Audio(camera);
 
       let sfx = ({
         name,
@@ -226,8 +226,7 @@ const Fireworks = () => {
       // loader.load( 'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function ( font ) {
       loader.load("fonts/helvetiker_regular.typeface.json", function (font) {
         // ♡ η
-        const phrases = ['I♡U-','IηU']; //['Texto aqui', 'Otra frase', 'Y otra más'];
-        // const phrases = ['1', '2', '3',	'4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14'];
+        const phrases = ["I♡U", "IηU","Nath","Naty", "Te amo", "TE AM♡"]; //['Texto aqui', 'Otra frase', 'Y otra más'];
         const geometries = [];
         for (let i = 0; i < phrases.length; i++) {
           geometries.push(
@@ -310,16 +309,16 @@ const Fireworks = () => {
         }}
       />
       <TinyCharacter
-        image="capibara.webp" // URL de la imagen
-        position={{ top: "90%", left: "90%" }} // Posición en la pantalla position
-        delay={3000} // Tiempo de espera en milisegundos (3 segundos)
-        redirectUrl="https://google.com" // URL de redirección
+        image="tiny-erick.webp" // URL de la imagen
+        position={{ top: "90dvh", right: "0vw" }} // Posición en la pantalla position
+        delay={17000} // Tiempo de espera en milisegundos (3 segundos)
+        redirectUrl="/card" // URL de redirección
         direction="right" // Dirección de entrada ("left" o "right")
         duration="3"
-        size="100px" // Tamaño del personaje
+        size="80px" // Tamaño del personaje
         dialogImage="dialog.png" // URL de la burbuja de diálogo
-        dialogDuration={1400} // Duración de la burbuja en ms
-        dialogInterval={6000} // Intervalo de aparición de la burbuja en ms
+        dialogDuration={3000} // Duración de la burbuja en ms
+        dialogInterval={7000} // Intervalo de aparición de la burbuja en ms
       />
     </div>
   );
@@ -329,7 +328,6 @@ export default Fireworks;
 
 function Renderer(mountRef) {
   //{THREE,OrbitControls,RGBELoader,GLTFLoader}
-  
 
   let { Scene, WebGLRenderer, PerspectiveCamera } = THREE;
   this.THREE = THREE;
@@ -515,8 +513,6 @@ function Renderer(mountRef) {
 
   this.onFrame = null;
 
-  
-
   let lastTime;
   /*
 
@@ -540,8 +536,7 @@ function Renderer(mountRef) {
 };
 */
 
-
-let animationLoop = (time) => {
+  let animationLoop = (time) => {
     let dt = lastTime ? time - lastTime : 0;
     lastTime = time;
     this.onFrame && this.onFrame(dt, time);
@@ -583,5 +578,3 @@ let animationLoop = (time) => {
     return mesh;
   };
 }
-
-
