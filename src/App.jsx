@@ -40,7 +40,7 @@ function App() {
                 imageUrl={"imagen.webp"}
                 //frase bonita de amor
                 // text="El amor es la fuerza más humilde, pero la más poderosa de que dispone el mundo."
-                rows={6} columns={8} // alto - ancho
+                rows={5} columns={7} // alto - ancho
                 // rows={1} columns={2} // alto- ancho
                 openModal={setOpen}
               />
